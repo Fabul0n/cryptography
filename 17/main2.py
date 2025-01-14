@@ -1,5 +1,5 @@
 """
-RSA without digital signature
+RSA with digital signature
 """
 
 import random
@@ -49,10 +49,10 @@ class User:
         return self.message
     
     def send_message(self, recipient_d, recipient_N):
-        return pow(self.message, recipient_d, recipient_N)
+        return pow(pow(self.message, self.c, self.N), recipient_d, recipient_N)
     
-    def decrypt_message(self, encrypted_message):
-        return pow(encrypted_message, self.c, self.N)
+    def decrypt_message(self, encrypted_message, sender_d, sender_N):
+        return pow(pow(encrypted_message, self.c, self.N), sender_d, sender_N)
     
 
 def main():
@@ -81,7 +81,7 @@ def main():
                 user2_id = int(input("Введите номер пользователя - получателя: "))
                 user1 = user_list[user1_id]
                 user2 = user_list[user2_id]
-                print(f"Полученное сообщение: {user2.decrypt_message(user1.send_message(user2.get_d(), user2.get_N()))}")
+                print(f"Полученное сообщение: {user2.decrypt_message(user1.send_message(user2.get_d(), user2.get_N()), user1.get_d(), user1.get_N())}")
                 input('Нажмите любую клавишу чтобы продолжить')
             case 4:
                 break
