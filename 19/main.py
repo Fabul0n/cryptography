@@ -18,7 +18,6 @@ def extended_gcd(a, b):
 bit_length = 128
 
 def matrix_mult_mod(a, b, mod):
-    """Умножение двух матриц 2x2 с взятием результата по модулю."""
     return [
         [(a[0][0] * b[0][0] + a[0][1] * b[1][0]) % mod,
          (a[0][0] * b[0][1] + a[0][1] * b[1][1]) % mod],
@@ -27,8 +26,7 @@ def matrix_mult_mod(a, b, mod):
     ]
 
 def matrix_pow_mod(mat, power, mod):
-    """Быстрое возведение матрицы в степень с взятием результата по модулю."""
-    result = [[1, 0], [0, 1]]  # Единичная матрица
+    result = [[1, 0], [0, 1]]
     while power > 0:
         if power % 2 == 1:
             result = matrix_mult_mod(result, mat, mod)
@@ -37,7 +35,6 @@ def matrix_pow_mod(mat, power, mod):
     return result
 
 def lucas_u(n, P, Q, mod):
-    """Вычисление U_n(P, Q) mod m с использованием матриц."""
     if n == 0:
         return 0
     elif n == 1:
@@ -45,11 +42,9 @@ def lucas_u(n, P, Q, mod):
     else:
         mat = [[0, 1], [-Q, P]]
         mat_n = matrix_pow_mod(mat, n - 1, mod)
-        # U_n = mat_n[1][0] * U_0 + mat_n[1][1] * U_1
         return (mat_n[1][0] * 0 + mat_n[1][1] * 1) % mod
 
 def lucas_v(n, P, Q, mod):
-    """Вычисление V_n(P, Q) mod m с использованием матриц."""
     if n == 0:
         return 2 % mod
     elif n == 1:
@@ -57,7 +52,6 @@ def lucas_v(n, P, Q, mod):
     else:
         mat = [[0, 1], [-Q, P]]
         mat_n = matrix_pow_mod(mat, n - 1, mod)
-        # V_n = mat_n[1][0] * V_0 + mat_n[1][1] * V_1
         return (mat_n[1][0] * 2 + mat_n[1][1] * P) % mod
 
 class CoolNum:
