@@ -2,6 +2,7 @@ import sympy
 import random
 import os
 import math
+import numpy as np
 
 
 def generate_prime(bit_length):
@@ -14,32 +15,50 @@ def extended_gcd(a, b):
         g, x, y = extended_gcd(b % a, a)
         return g, y - (b // a) * x, x
 
-bit_length = 6
+bit_length = 128
 
-def lucas_u(n, P, Q):
+def matrix_mult_mod(a, b, mod):
+    """Умножение двух матриц 2x2 с взятием результата по модулю."""
+    return [
+        [(a[0][0] * b[0][0] + a[0][1] * b[1][0]) % mod,
+         (a[0][0] * b[0][1] + a[0][1] * b[1][1]) % mod],
+        [(a[1][0] * b[0][0] + a[1][1] * b[1][0]) % mod,
+         (a[1][0] * b[0][1] + a[1][1] * b[1][1]) % mod],
+    ]
+
+def matrix_pow_mod(mat, power, mod):
+    """Быстрое возведение матрицы в степень с взятием результата по модулю."""
+    result = [[1, 0], [0, 1]]  # Единичная матрица
+    while power > 0:
+        if power % 2 == 1:
+            result = matrix_mult_mod(result, mat, mod)
+        mat = matrix_mult_mod(mat, mat, mod)
+        power = power // 2
+    return result
+
+def lucas_u(n, P, Q, mod):
+    """Вычисление U_n(P, Q) mod m с использованием матриц."""
     if n == 0:
         return 0
     elif n == 1:
-        return 1
+        return 1 % mod
     else:
-        U_prev_prev, U_prev = 0, 1
-        for _ in range(2, n + 1):
-            U_current = P * U_prev - Q * U_prev_prev
-            U_prev_prev, U_prev = U_prev, U_current
-        return U_prev
+        mat = [[0, 1], [-Q, P]]
+        mat_n = matrix_pow_mod(mat, n - 1, mod)
+        # U_n = mat_n[1][0] * U_0 + mat_n[1][1] * U_1
+        return (mat_n[1][0] * 0 + mat_n[1][1] * 1) % mod
 
-def lucas_v(n, P, Q):
+def lucas_v(n, P, Q, mod):
+    """Вычисление V_n(P, Q) mod m с использованием матриц."""
     if n == 0:
-        return 2
+        return 2 % mod
     elif n == 1:
-        return P
+        return P % mod
     else:
-        print(n)
-        V_prev_prev, V_prev = 2, P
-        for _ in range(2, n + 1):
-            V_current = P * V_prev - Q * V_prev_prev
-            V_prev_prev, V_prev = V_prev, V_current
-        return V_prev
+        mat = [[0, 1], [-Q, P]]
+        mat_n = matrix_pow_mod(mat, n - 1, mod)
+        # V_n = mat_n[1][0] * V_0 + mat_n[1][1] * V_1
+        return (mat_n[1][0] * 2 + mat_n[1][1] * P) % mod
 
 class CoolNum:
     def __init__(self, a, b, c):
@@ -134,7 +153,7 @@ class User:
         gamma_b = (gamma_b * denomin_inv) % recipient_n
         alpha = CoolNum(gamma_a, gamma_b, recipient_c)
         b2 = gamma_a % 2
-        E = ((lucas_v(recipient_e, 2*gamma_a, 1) * sympy.mod_inverse(2, recipient_n) % recipient_n) * sympy.mod_inverse((gamma_b*lucas_u(recipient_e, 2*gamma_a, 1)) % recipient_n, recipient_n)) % recipient_n
+        E = ((lucas_v(recipient_e, 2*gamma_a, 1, recipient_n) * sympy.mod_inverse(2, recipient_n) % recipient_n) * sympy.mod_inverse((gamma_b*lucas_u(recipient_e, 2*gamma_a, 1, recipient_n)) % recipient_n, recipient_n)) % recipient_n
         return (E, b1, b2)
 
     
@@ -145,8 +164,8 @@ class User:
         denomin_inv = sympy.mod_inverse(denomin, self.n)
         cooln_a = (cooln_a * denomin_inv) % self.n
         cooln_b = (cooln_b * denomin_inv) % self.n
-        alpha_2ed_a = ((lucas_v(self.d, 2*cooln_a, 1) * sympy.mod_inverse(2, self.n)) % self.n)
-        alpha_2ed_b = ((cooln_b * lucas_u(self.d, 2*cooln_a, 1)) % self.n)
+        alpha_2ed_a = ((lucas_v(self.d, 2*cooln_a, 1, self.n) * sympy.mod_inverse(2, self.n)) % self.n)
+        alpha_2ed_b = ((cooln_b * lucas_u(self.d, 2*cooln_a, 1, self.n)) % self.n)
         if b2 == 1 and alpha_2ed_a % 2 == 0:
             alpha_2ed_a = (-alpha_2ed_a) % self.n
             alpha_2ed_b = (-alpha_2ed_b) % self.n
@@ -176,8 +195,8 @@ class User:
 
 def main():
     user_list = [User("Alice"), User("Bob")]
-    user_list[0].set_message(12)
-    user_list[1].set_message(98)
+    user_list[0].set_message(1234567899)
+    user_list[1].set_message(9987654321)
     while 1:
         os.system('cls||clear')
         match int(input((
