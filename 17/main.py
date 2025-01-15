@@ -4,6 +4,7 @@ RSA without digital signature
 
 import random
 import sympy
+import math
 import os
 
 def generate_prime(bit_length):
@@ -16,7 +17,7 @@ def extended_gcd(a, b):
         g, x, y = extended_gcd(b % a, a)
         return g, y - (b // a) * x, x
 
-bit_length = 128
+bit_length = 1024
 
 class User:
     def __init__(self, name):
@@ -28,7 +29,7 @@ class User:
         self.phi = (self.P-1)*(self.Q-1)
         while 1:
             c = random.randint(2, self.phi-1)
-            if extended_gcd(c, self.phi)[0] == 1:
+            if math.gcd(c, self.phi) == 1:
                 self.c = c
                 self.d = sympy.mod_inverse(c, self.phi)
                 break

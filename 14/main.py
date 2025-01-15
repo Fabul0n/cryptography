@@ -16,7 +16,7 @@ def generate_primitive_root(p, q):
         if pow(g, q, p) != 1:
             return g
 
-bit_length = 512
+bit_length = 1024
 p, q = generate_prime(bit_length)
 g = generate_primitive_root(p, q)
 

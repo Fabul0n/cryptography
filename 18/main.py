@@ -16,7 +16,7 @@ def extended_gcd(a, b):
         g, x, y = extended_gcd(b % a, a)
         return g, y - (b // a) * x, x
 
-bit_length = 128
+bit_length = 1024
 
 class User:
     def __init__(self, name):
