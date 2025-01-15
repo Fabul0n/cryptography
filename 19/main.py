@@ -53,6 +53,12 @@ class CoolNum:
     def __mul__(self, other):
         return CoolNum(self.a * other.a + self.b * other.b * self.c, self.a * other.b + self.b * other.a, self.c)
     
+    def add_a(self, a):
+        return CoolNum(self.a + a, self.b, self.c)
+
+    def add_b(self, b):
+        return CoolNum(self.a, self.b + b, self.c)
+    
     def get_num(self):
         return self.a, self.b, self.c
 
@@ -128,7 +134,7 @@ class User:
         gamma_b = (gamma_b * denomin_inv) % recipient_n
         alpha = CoolNum(gamma_a, gamma_b, recipient_c)
         b2 = gamma_a % 2
-        E = ((lucas_v(recipient_e, 2*gamma_a, 1) * sympy.mod_inverse(2, recipient_n) % recipient_n) * sympy.mod_inverse((gamma_b*lucas_u(recipient_e, 2*gamma_a, 1)) % recipient_n, self.n)) % recipient_n
+        E = ((lucas_v(recipient_e, 2*gamma_a, 1) * sympy.mod_inverse(2, recipient_n) % recipient_n) * sympy.mod_inverse((gamma_b*lucas_u(recipient_e, 2*gamma_a, 1)) % recipient_n, recipient_n)) % recipient_n
         return (E, b1, b2)
 
     
