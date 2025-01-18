@@ -79,11 +79,11 @@ class User:
     def __init__(self, name):
         self.name = name
         self.message = None
-        self.p = generate_prime(bit_length)
-        self.q = generate_prime(bit_length)
+        self.p = 4520729
+        self.q = 16140287
         self.n = self.p * self.q
         f = 0
-        for c in range(1, self.n):
+        for c in range(2, self.n):
             delta_p = sympy.legendre_symbol(c, self.p)
             delta_q = sympy.legendre_symbol(c, self.q)
             if delta_p % 4 == (-self.p) % 4:
@@ -91,17 +91,15 @@ class User:
                     for s in range(1, self.n):
                         if sympy.jacobi_symbol(s**2 - c, self.n) == -1 and math.gcd(s, self.n) == 1:
                             m = (self.p - delta_p)*(self.q - delta_q)//4
-                            for d in range(2, self.n):
-                                if math.gcd(d, m) == 1:
-                                    e = (m+1)//2*sympy.mod_inverse(d, m)
-                                    self.c = c
-                                    self.s = s
-                                    self.m = m
-                                    self.d = d
-                                    self.e = e
-                                    f = 1
-                                if f:
-                                    break
+                            d = 8688570499328
+                            if math.gcd(d, m) == 1:
+                                e = (m+1)//2*sympy.mod_inverse(d, m)
+                                self.c = c
+                                self.s = s
+                                self.m = m
+                                self.d = d
+                                self.e = e
+                                f = 1
                         if f: break
             if f:
                 break
@@ -134,10 +132,10 @@ class User:
     def encrypt_message(self, recipient_n, recipient_e, recipient_c, recipients_s):
         w = self.message
         if sympy.jacobi_symbol(w**2 - recipient_c, recipient_n) == 1:
-            b1 = 1
+            b1 = -1
             gamma = CoolNum(w, 1, recipient_c)
         else:
-            b1 = -1
+            b1 = 1
             gamma = CoolNum(w, 1, recipient_c)*CoolNum(recipients_s, 1, recipient_c)
         
         (gamma_a, gamma_b, smth) = (gamma*gamma).get_num()
@@ -167,7 +165,7 @@ class User:
             alpha_2ed_a = (-alpha_2ed_a) % self.n
             alpha_2ed_b = (-alpha_2ed_b) % self.n
         
-        if b1 == -1:
+        if b1 == 1:
             tmpcn = CoolNum(self.s, -1, self.c)
             (denomin, smth, smth2) = (tmpcn * tmpcn.conjugate()).get_num()
             denomin_inv = sympy.mod_inverse(denomin, self.n)
@@ -189,7 +187,7 @@ class User:
 
 def main():
     user_list = [User("Alice"), User("Bob")]
-    user_list[0].set_message(1234567899)
+    user_list[0].set_message(47175905580773)
     user_list[1].set_message(9987654321)
     while 1:
         os.system('cls||clear')
@@ -214,6 +212,7 @@ def main():
                 user1 = user_list[user1_id]
                 user2 = user_list[user2_id]
                 (encrypted_mes, b1, b2) = user1.encrypt_message(user2.get_n(), user2.get_e(), user2.get_c(), user2.get_s())
+                print(encrypted_mes, b1, b2)
                 print(f"Полученное сообщение: {user2.decrypt_message(encrypted_mes, b1, b2)}")
                 input('Нажмите любую клавишу чтобы продолжить')
             case 4:
